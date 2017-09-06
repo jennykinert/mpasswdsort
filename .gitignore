@@ -1,0 +1,6 @@
+.idea/
+ a.out
+*.o
+cmake-build-debug/
+
+mpasswdsort
