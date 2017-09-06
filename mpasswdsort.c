@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "list.h"
+
+#define MAXSIZE 1023
 /**
  * <mpasswdsort.c>
  * <Jenny><Kinert>
@@ -12,7 +14,7 @@
  */
 bool controlLine(char *Buffer, int lineCounter);
 FILE *openFile(int argc, char **argv);
-struct user_info *extractUIFromBuffer(char buffer[]);
+struct user_info *extractUIFromBuffer(char *buffer);
 void systemCheck(void *memory);
 void freeListItems(list *ls);
 
@@ -20,9 +22,10 @@ void freeListItems(list *ls);
 int main(int argc, char** argv ) {
     list *ls = newEmptyLinkedList();
     struct user_info *ui;
-    char buffer[1023];
     int lineCounter=0;
     bool endWithExit = false;
+    char *buffer = malloc(MAXSIZE);
+    systemCheck(buffer);
 
     FILE *fp;
     // This option if no file is attached to program
@@ -59,12 +62,10 @@ int main(int argc, char** argv ) {
     sortList(ls);
     for(int i = 0; i<sizeOfList(ls); i++){
         ui = getUserInfoFromIndex(ls, i);
-        //unsigned int uid = ui->uid;
-        //char *uname = malloc(sizeof(ui->uname));
-        //uname = ui->uname;
-        //printf("%d:%s\n", uid,ui->uname);
+        printf("%d:%s\n", ui->uid,ui->uname);
     }
     fclose(fp);
+    free(buffer);
     freeListItems(ls);
     free(ls);
     if(endWithExit){
@@ -80,23 +81,24 @@ int main(int argc, char** argv ) {
  * @param Buffer
  * @return user_info (information to insert in the list)
  */
-struct user_info *extractUIFromBuffer(char buffer[]){
+struct user_info *extractUIFromBuffer(char *buffer){
     struct user_info *ui = malloc(sizeof(struct user_info));
     systemCheck(ui);
     int coloncounter = 0;
     int secondColon = 0;
     int max = (int)strlen(buffer);
+
     for(int i=0; i<= max ;i++ ){
         if(buffer[i] == ':' && coloncounter == 0){
-            char *tempUname = (char *)malloc(1023);
+            char *tempUname = malloc(MAXSIZE);
             systemCheck(tempUname);
             strncpy(tempUname,buffer, i);
+            tempUname[i]='\0';
             ui->uname = tempUname;
-            printf("%s",tempUname);
             coloncounter ++;
         }
         else if(buffer[i] == ':' && coloncounter == 2){
-            char *tempUID = (char *)malloc(i-secondColon);
+            char *tempUID = malloc(i-secondColon);
             systemCheck(tempUID);
             strncpy(tempUID,buffer+secondColon+1, i - secondColon-1);
             tempUID[i-secondColon-1]='\0';
@@ -146,7 +148,7 @@ FILE *openFile(int argc, char **argv){
  * @param buffer
  * @return bool (variable to now if something in the format is wrong)
  */
-bool controlLine(char buffer[], int lineCounter){
+bool controlLine(char *buffer, int lineCounter){
     int bufferLenght = (int) strlen(buffer);
     char buffercpy[100];
     int colonCounter=0;
@@ -222,6 +224,11 @@ bool controlLine(char buffer[], int lineCounter){
     }
 }
 
+/**
+ * Name: systemCheck
+ * Description: A function to control if mempory was allocated for pointer.
+ * @param memory
+ */
 void systemCheck(void *memory){
     if(memory==NULL){
         fprintf(stderr, "%s\n", "Something went wrong when allocating memory!");
