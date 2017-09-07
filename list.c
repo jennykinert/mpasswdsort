@@ -101,8 +101,22 @@ struct user_info *getUserInfoFromIndex(list *list, int index){
  * @param list
  */
 void sortList(list *list){
-    int size = sizeOfList(list);
+    struct user_info *first= list->next;
+
+    while(first != NULL ){
+        struct user_info *second = first->next;
+        while(second != NULL){
+            if(first->uid > second->uid){
+                swap(first, second);
+            }
+            second = second->next;
+        }
+        first=first->next;
+    }
+/**int size = sizeOfList(list);
+
     int i,j;
+
     for(i = 0; i < size; i++){
         for(j = 0; j<size-1; j++){
             struct user_info *first = getUserInfoFromIndex(list, j);
@@ -111,7 +125,7 @@ void sortList(list *list){
                 swap(first,second);
             }
         }
-    }
+    }**/
 }
 
 /**
