@@ -127,17 +127,9 @@ FILE *openFile(int argc, char **argv){
     FILE *fp;
     fp = fopen(argv[argc-1],"r");
     if(fp==NULL){
-        fprintf(stderr, "%s\n", "Couldn't open file");
+        perror("Error in mpasswdsort openFile: ");
         exit(EXIT_FAILURE);
     }
-    //Kan inte ha den här kollen då den första raden försvinner
-    /**char buffer[BUFSIZ];
-    fgets(buffer, 1024,fp);
-    if(buffer == NULL){
-        fprintf(stderr, "%s\n", "Failed to read file");
-        fprintf(stderr, "%s\n", "Best guess is that file was empty!");
-        exit(EXIT_FAILURE);
-    }**/
     return fp;
 }
 
@@ -231,7 +223,7 @@ bool controlLine(char *buffer, int lineCounter){
  */
 void systemCheck(void *memory){
     if(memory==NULL){
-        fprintf(stderr, "%s\n", "Something went wrong when allocating memory!");
+        perror("Error in mpasswdsort systemCheck");
         exit(EXIT_FAILURE);
     }
 }
