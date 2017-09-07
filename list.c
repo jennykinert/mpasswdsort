@@ -120,7 +120,7 @@ void sortList(list *list){
  */
 void listSystemCheck(void *memory){
     if(memory==NULL){
-        fprintf(stderr, "%s\n", "Malloc fucked up big time!");
+        perror("Error in list listSystemCheck: ");
         exit(EXIT_FAILURE);
     }
 }
