@@ -1,38 +1,29 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "list.h"
-
+#include "mpasswdsort.h"
 #define MAXSIZE 1023
 /**
  * <mpasswdsort.c>
  * <Jenny><Kinert>
  * Laboration <1> <systemnära programmering> <HT2017>
- * Frågor kring filkontrollen. Kan man anta att kolona är där även om fältet är tomt?
  * @return
  */
-bool controlLine(char *Buffer, int lineCounter);
-FILE *openFile(int argc, char **argv);
-struct user_info *extractUIFromBuffer(char *buffer);
-void systemCheck(void *memory);
-void freeListItems(list *ls);
 
 
 int main(int argc, char** argv ) {
-    list *ls = newEmptyLinkedList();
-    struct user_info *ui;
+    //some variable declarations
+    FILE *fp;
+    struct userInfo *ui;
     int lineCounter=0;
     bool endWithExit = false;
     char *buffer = malloc(MAXSIZE);
     systemCheck(buffer);
 
-    FILE *fp;
+
+    list *ls = newEmptyLinkedList();
+
     // This option if no file is attached to program
     if(argc == 1)
     {
         fp = stdin;
-        //printf ("\nEnter string below, finish with [ctrl + d]\n");
     }
 
     //This option if a file is attached to program
@@ -81,8 +72,8 @@ int main(int argc, char** argv ) {
  * @param Buffer
  * @return user_info (information to insert in the list)
  */
-struct user_info *extractUIFromBuffer(char *buffer){
-    struct user_info *ui = malloc(sizeof(struct user_info));
+struct userInfo *extractUIFromBuffer(char *buffer){
+    struct userInfo *ui = malloc(sizeof(struct userInfo));
     systemCheck(ui);
     int coloncounter = 0;
     int secondColon = 0;
@@ -134,86 +125,131 @@ FILE *openFile(int argc, char **argv){
 }
 
 /**
- * Name: control Line
- * Description: Controls if the line is missing any fields or is written in the
- * wrong format.
+ * Name: getDataFields
+ * Description: Extract the fields of file passwd into an matrix
  * @param buffer
- * @return bool (variable to now if something in the format is wrong)
+ * @return (the matrix with data)
  */
-bool controlLine(char *buffer, int lineCounter){
-    int bufferLenght = (int) strlen(buffer);
-    char buffercpy[100];
-    int colonCounter=0;
-    int lastColonPosition=0;
-    bool control = false;
-
-    for(int i=0; i<=bufferLenght; i++ ){
-        memset(buffercpy, '\0', sizeof(buffercpy));
+char **getDataFields(char *buffer){
+    char **dataFields = calloc(8, sizeof(char*));
+    systemCheck(dataFields);
+    int bufferLength = (int)strlen(buffer);
+    int lastcolonposition = 0;
+    int colonCounter = 0;
+    for(int i =0; i<bufferLength;i++){
         if(buffer[i]==':'){
-            colonCounter ++;
-            strncpy(buffercpy,buffer+lastColonPosition, (size_t)
-                    (i - lastColonPosition));
-            lastColonPosition=i;
-            switch(colonCounter){
-                case 1:
-                    if(strlen(buffercpy)== 0){
-                        fprintf(stderr,"Line %d: %s",lineCounter, "The username"
-                                "cannot be empty \n");
-                        return control = true;
-                    }
-                    else if(strlen(buffercpy)>32){
-                        fprintf(stderr,"Line %d %s",lineCounter, "The username"
-                                "cannot be longer than 32 letters\n");
-                        return control = true;
-                    }
-                    break;
-                case 3:
-                    if(strlen(buffercpy)== 1){
-                        fprintf(stderr,"Line %d: %s",lineCounter, "the UID "
-                                "cannot be empty \n");
-                        return control = true;
-                    }
-                    else if(buffercpy[1]=='-'){
-                        fprintf(stderr,"Line %d: %s",lineCounter, "the UID "
-                                "cannot be negative \n");
-                        return control = true;
-                        }
-                    break;
-                case 4:
-                    if(strlen(buffercpy)== 1){
-                        fprintf(stderr,"Line %d: %s",lineCounter, "the GID "
-                                "cannot be empty \n");
-                        return control = true;
-                    }
-                    int lengthOfCpy = (int)strlen(buffercpy);
-                    for(int i =1; i<lengthOfCpy; i++){
-                        int digit = buffercpy[i];
-                        if(!isdigit(digit)){
-                            fprintf(stderr,"Line %d: %s",lineCounter, "the GID "
-                                    "is not a number \n");
-                            return control = true;
-                        }
-                    }
-                    break;
-                case 6:
-                    if(strlen(buffercpy)== 1){
-                        fprintf(stderr,"Line %d: %s",lineCounter, "the "
-                                "directory cannot be empty \n");
-                        return control = true;
-                    }
-                    break;
-                default:break;
-            }
+            char *parameter = calloc(100, sizeof(char));
+            systemCheck(parameter);
+            strncpy(parameter,buffer+lastcolonposition,(size_t)(i-lastcolonposition));
+            lastcolonposition=i;
+            dataFields[colonCounter] = parameter;
+            colonCounter++;
         }
     }
     if(colonCounter == 0 || colonCounter!=6 ){
+        dataFields[0] = 0;
+    }
+    return dataFields;
+}
+/**
+ * Name: controlLine
+ * Description: controls the format of the lines. If something departs message
+ * is written on stderr
+ * @param buffer
+ * @param lineCounter
+ * @return (true or false if the program should exit with !=0)
+ */
+bool controlLine(char *buffer, int lineCounter){
+    bool control = false;
+    char **dataFields = getDataFields(buffer);
+    int numberOfFields = (int)sizeof(dataFields);
+
+    if(dataFields[0]==0){
         fprintf(stderr,"Line %d: %s",lineCounter,"The format of "
                 "line is wrong\n");
+        return control = true;
+    }
+    for(int i =0; i<numberOfFields; i++){
+        if(i==0|| i==2 || i==3 ){
+            control = controlIfEmpty(dataFields[i]);
+            if(control){
+                const char *typeOfField = getFieldName(i);
+                fprintf(stderr,"Line %d: %s cannot be empty \n",lineCounter,
+                        typeOfField);
+                return control = true;
+            }
+        }
+        if(i == 2 || i == 3){
+            control = controlIfNumber(dataFields[i]);
+            if(control){
+                const char *typeOfField = getFieldName(i);
+                fprintf(stderr,"Line %d: %s is not a number \n",lineCounter,
+                        typeOfField);
+                return control = true;
+            }
+        }
+        if(i==0){
+            if(strlen(dataFields[i])>32) {
+                fprintf(stderr, "Line %d: The username"
+                        "cannot be longer than 32 letters\n", lineCounter);
+                return control = true;
+            }
+        }
+    }
+    freeDataFields(dataFields);
+    free(dataFields);
+    return control;
+
+}
+/**
+ * Name: controlIfNumber
+ * Description: Controls if the field is a number or not.
+ * @param parameter
+ * @return
+ */
+bool controlIfNumber(char *parameter){
+    int lengthOfCpy = (int)strlen(parameter);
+    bool control = false;
+    for(int i =1; i<lengthOfCpy; i++){
+        int digit = parameter[i];
+        if(!isdigit(digit)){
+            return control = true;
+        }
+    }
+    return control;
+}
+/**
+ * Name: controlIfEmpty
+ * Description: controls if a mandatory field is empty
+ * @param parameter
+ * @return
+ */
+bool controlIfEmpty(char *parameter){
+    bool control = false;
+    if(strlen(parameter) == 0){
         return control = true;
     }
     else{
         return control;
     }
+}
+
+/**
+ * Helper function to get the name of fields UID GID and user name
+ * @param field
+ * @return
+ */
+const char* getFieldName(int field)
+{
+    switch (field)
+    {
+        case 0: return "User Name";
+        case 2: return "UID";
+        case 3: return "GID";
+        default:
+            return "something went wrong in getFieldName function";
+    }
+
 }
 
 /**
@@ -235,10 +271,22 @@ void systemCheck(void *memory){
  */
 void freeListItems(list *ls){
     while(ls->next!=NULL){
-        struct user_info *ui = ls->next;
-        struct user_info *tempUI = ui->next;
+        struct userInfo *ui = ls->next;
+        struct userInfo *tempUI = ui->next;
         free(ui->uname);
         free(ui);
         ls->next = tempUI;
+    }
+}
+
+/**
+ * Name: freeDataFields
+ * Description: frees the memory allocated in a matrix.
+ * @param dataFields (the matrix items to be freed)
+ */
+void freeDataFields(char **dataFields){
+    int length = (int)sizeof(dataFields);
+    for(int i =0; i<length; i++){
+        free(dataFields[i]);
     }
 }

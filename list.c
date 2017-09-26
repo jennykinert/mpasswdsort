@@ -23,7 +23,7 @@ list *newEmptyLinkedList(){
  * @param list
  * @param ui
  */
-void addValue(list *list, struct user_info *ui){
+void addValue(list *list, struct userInfo *ui){
     ui->next = list->next;
     list->next = ui;
     list->size++;
@@ -60,7 +60,7 @@ int sizeOfList(list *list){
  * bubblesort
  * @param list
  */
-void swap(struct user_info *ui1, struct user_info *ui2){
+void swap(struct userInfo *ui1, struct userInfo *ui2){
 
     //Swap the usernames
     char *temp = ui1->uname;
@@ -83,8 +83,8 @@ void swap(struct user_info *ui1, struct user_info *ui2){
  * @param index
  * @return *ui (The user info at the index)
  */
-struct user_info *getUserInfoFromIndex(list *list, int index){
-    struct user_info *ui = list->next;
+struct userInfo *getUserInfoFromIndex(list *list, int index){
+    struct userInfo *ui = list->next;
     unsigned int temp = index;
     if(temp >= list->size){
         return NULL;
@@ -101,10 +101,10 @@ struct user_info *getUserInfoFromIndex(list *list, int index){
  * @param list
  */
 void sortList(list *list){
-    struct user_info *first= list->next;
+    struct userInfo *first= list->next;
 
     while(first != NULL ){
-        struct user_info *second = first->next;
+        struct userInfo *second = first->next;
         while(second != NULL){
             if(first->uid > second->uid){
                 swap(first, second);
@@ -113,19 +113,6 @@ void sortList(list *list){
         }
         first=first->next;
     }
-/**int size = sizeOfList(list);
-
-    int i,j;
-
-    for(i = 0; i < size; i++){
-        for(j = 0; j<size-1; j++){
-            struct user_info *first = getUserInfoFromIndex(list, j);
-            struct user_info *second = getUserInfoFromIndex(list,j+1);
-            if(first->uid > second->uid){
-                swap(first,second);
-            }
-        }
-    }**/
 }
 
 /**

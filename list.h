@@ -7,13 +7,23 @@
 
 #include <stdbool.h>
 
-//typedef struct head{ unsigned int size; struct user_info *next;} list;
+/**
+ * Name: list
+ * Description: This is the head of the list. which keep track of the list size
+ * and the first element of the list
+ * @param size (the number of elements in the list)
+ * @parm next (pointer to an element in this list)
+ */
 typedef struct head{ unsigned int size; void* next;} list;
 
-
-//struct user_info{ unsigned int uid; char* uname; struct user_info *next;};
-
-struct user_info{ unsigned int uid; char* uname; void* next;};
+/**
+ * Name: userInfo
+ * Description: this is the structure of list elements in this laboration.
+ * @param uid
+ * @param uname
+ * @param next (pointer to next element in list)
+ */
+struct userInfo{ unsigned int uid; char* uname; void* next;};
 
 /**
  * Function: newEmptyLinkedList
@@ -28,7 +38,7 @@ list *newEmptyLinkedList();
  * @param list
  * @param ui
  */
-void addValue(list *list, struct user_info *ui);
+void addValue(list *list, struct userInfo *ui);
 
 /**
  * Name: isEmpty
@@ -52,7 +62,7 @@ int sizeOfList(list *list);
  * bubblesort
  * @param list
  */
-void swap(struct user_info *ui1, struct user_info *ui2);
+void swap(struct userInfo *ui1, struct userInfo *ui2);
 
 /**
  * Name: getUserInfoFromIndex
@@ -61,7 +71,7 @@ void swap(struct user_info *ui1, struct user_info *ui2);
  * @param index
  * @return
  */
-struct user_info *getUserInfoFromIndex(list *list, int index);
+struct userInfo *getUserInfoFromIndex(list *list, int index);
 
 /**
  * Name: sortList
