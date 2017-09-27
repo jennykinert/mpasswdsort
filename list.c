@@ -9,11 +9,12 @@
  * Description: Creates a new empty linked list
  * @return: Pointer to the List
  */
-list *newEmptyLinkedList(){
+list *newEmptyLinkedList(c *comp){
     list* list1 = malloc(sizeof(list));
     listSystemCheck(list1);
     list1->size=0;
     list1->next=NULL;
+    list1->compare = comp;
     return list1;
 }
 
@@ -23,15 +24,16 @@ list *newEmptyLinkedList(){
  * @param list
  * @param ui
  */
-void addValue(list *list, struct userInfo *ui){
-    ui->next = list->next;
-    list->next = ui;
+void addValue(list *list, node *node){
+    node->next = list->next;
+    list->next = node;
     list->size++;
 }
+
 /**
  * Name: isEmpty
  * Description: controls if the list is empty or not
- * @param: list
+ * @param:
  * @return: boolean
  */
 bool isEmpty(list *list){
@@ -60,39 +62,29 @@ int sizeOfList(list *list){
  * bubblesort
  * @param list
  */
-void swap(struct userInfo *ui1, struct userInfo *ui2){
-
-    //Swap the usernames
-    char *temp = ui1->uname;
-    ui1->uname = ui2->uname;
-    ui2->uname = temp;
-
-    //Swap the UID
-    unsigned int tempUID;
-    tempUID = ui1->uid;
-    ui1->uid = ui2->uid;
-    ui2->uid = tempUID;
-
+void swap(node *element1, node *element2){
+    void *temp = element1->data;
+    element1->data = element2->data;
+    element2->data=temp;
 }
 
 /**
- * Name: getUserInfoFromIndex
- * Description: Resturns the user info positioned at the specified index as a
- * pointer
+ * Name: getNodeFromIndex
+ * Description: Resturns the Node positioned at the specified index
  * @param list
  * @param index
- * @return *ui (The user info at the index)
+ * @return
  */
-struct userInfo *getUserInfoFromIndex(list *list, int index){
-    struct userInfo *ui = list->next;
+node *getNodeFromIndex(list *list, int index){
+    node *node = list->next;
     unsigned int temp = index;
     if(temp >= list->size){
         return NULL;
     }
     for(int i = 0; i<index ; i++){
-        ui = ui->next;
+        node = node->next;
     }
-    return ui;
+    return node;
 }
 
 /**
@@ -101,12 +93,13 @@ struct userInfo *getUserInfoFromIndex(list *list, int index){
  * @param list
  */
 void sortList(list *list){
-    struct userInfo *first= list->next;
+    node *first= list->next;
 
     while(first != NULL ){
-        struct userInfo *second = first->next;
+        node *second = first->next;
         while(second != NULL){
-            if(first->uid > second->uid){
+            bool control = list->compare(first,second);
+            if(control){
                 swap(first, second);
             }
             second = second->next;

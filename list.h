@@ -8,37 +8,46 @@
 #include <stdbool.h>
 
 /**
+ * Name: node
+ * Description: struct for the nodes to be placed in the list. Every node
+ * contain data and a pointer to the next node
+ * @param data (data to hold in list)
+ * @param next (next node in list)
+ */
+typedef struct node{void *data; struct node *next;} node;
+
+/**
+ * Name: c
+ * Description: typedef for compare function to be sent to the list when
+ * creating it.
+ * @param data (nodes to be compared in function)
+ */
+typedef bool c(node *data1 , node *data2);
+/**
  * Name: list
  * Description: This is the head of the list. which keep track of the list size
  * and the first element of the list
  * @param size (the number of elements in the list)
  * @parm next (pointer to an element in this list)
+ * @param c (funktionpointer to compare function)
  */
-typedef struct head{ unsigned int size; void* next;} list;
+typedef struct head{ unsigned int size; void* next; c *compare;} list;
 
-/**
- * Name: userInfo
- * Description: this is the structure of list elements in this laboration.
- * @param uid
- * @param uname
- * @param next (pointer to next element in list)
- */
-struct userInfo{ unsigned int uid; char* uname; void* next;};
 
 /**
  * Function: newEmptyLinkedList
  * Description: Creates a new empty linked list
  * @return: Pointer to the List
  */
-list *newEmptyLinkedList();
+list *newEmptyLinkedList(c *comp);
 
 /**
  * Name: addValue
  * Description: Adds a new value to the list
  * @param list
- * @param ui
+ * @param node
  */
-void addValue(list *list, struct userInfo *ui);
+void addValue(list *list, node *node);
 
 /**
  * Name: isEmpty
@@ -62,16 +71,16 @@ int sizeOfList(list *list);
  * bubblesort
  * @param list
  */
-void swap(struct userInfo *ui1, struct userInfo *ui2);
+void swap(node *element1, node *element2);
 
 /**
- * Name: getUserInfoFromIndex
- * Description: Resturns the user info positioned at the specified index
+ * Name: getNodeFromIndex
+ * Description: Resturns the Node positioned at the specified index
  * @param list
  * @param index
  * @return
  */
-struct userInfo *getUserInfoFromIndex(list *list, int index);
+node *getNodeFromIndex(list *list, int index);
 
 /**
  * Name: sortList

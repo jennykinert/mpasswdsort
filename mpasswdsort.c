@@ -9,6 +9,7 @@
 
 
 int main(int argc, char** argv ) {
+
     //some variable declarations
     FILE *fp;
     struct userInfo *ui;
@@ -18,8 +19,8 @@ int main(int argc, char** argv ) {
     systemCheck(buffer);
 
 
-    list *ls = newEmptyLinkedList();
-
+    //list *ls = newEmptyLinkedList();
+    list *ls = newEmptyLinkedList(comparefunc);
     // This option if no file is attached to program
     if(argc == 1)
     {
@@ -44,7 +45,10 @@ int main(int argc, char** argv ) {
         bool control = controlLine(buffer, lineCounter);
         if (control == false) {
             ui = extractUIFromBuffer(buffer);
-            addValue(ls, ui);
+            node *myNode = calloc(1,sizeof(node));
+            systemCheck(myNode);
+            myNode->data = ui;
+            addValue(ls, myNode);
         }
         else {
             endWithExit = true;
@@ -52,7 +56,8 @@ int main(int argc, char** argv ) {
     }
     sortList(ls);
     for(int i = 0; i<sizeOfList(ls); i++){
-        ui = getUserInfoFromIndex(ls, i);
+        node *tempNode = getNodeFromIndex(ls, i);
+        ui = tempNode->data;
         printf("%d:%s\n", ui->uid,ui->uname);
     }
     fclose(fp);
@@ -63,6 +68,27 @@ int main(int argc, char** argv ) {
         exit(EXIT_FAILURE);
     }
     return 0;
+}
+/**
+ * Name: comparefunc
+ * Description: Compare function to be send to the list for comparing elements
+ * in the list.
+ * @param element1
+ * @param element2
+ * @return
+ */
+bool comparefunc(node *element1, node *element2){
+    bool compareVariable = false;
+    struct userInfo *ui1;
+    struct userInfo *ui2;
+    ui1=element1->data;
+    ui2 = element2->data;
+    if(ui1->uid > ui2->uid){
+        return compareVariable = true;
+    }
+    else{
+        return compareVariable;
+    }
 }
 
 /**
@@ -157,7 +183,7 @@ char **getDataFields(char *buffer){
  * is written on stderr
  * @param buffer
  * @param lineCounter
- * @return (true or false if the program should exit with !=0)
+ * @return
  */
 bool controlLine(char *buffer, int lineCounter){
     bool control = false;
@@ -167,7 +193,7 @@ bool controlLine(char *buffer, int lineCounter){
     if(dataFields[0]==0){
         fprintf(stderr,"Line %d: %s",lineCounter,"The format of "
                 "line is wrong\n");
-        return control = true;
+        control = true;
     }
     for(int i =0; i<numberOfFields; i++){
         if(i==0|| i==2 || i==3 ){
@@ -176,7 +202,7 @@ bool controlLine(char *buffer, int lineCounter){
                 const char *typeOfField = getFieldName(i);
                 fprintf(stderr,"Line %d: %s cannot be empty \n",lineCounter,
                         typeOfField);
-                return control = true;
+                control = true;
             }
         }
         if(i == 2 || i == 3){
@@ -185,14 +211,14 @@ bool controlLine(char *buffer, int lineCounter){
                 const char *typeOfField = getFieldName(i);
                 fprintf(stderr,"Line %d: %s is not a number \n",lineCounter,
                         typeOfField);
-                return control = true;
+                control = true;
             }
         }
         if(i==0){
             if(strlen(dataFields[i])>32) {
                 fprintf(stderr, "Line %d: The username"
                         "cannot be longer than 32 letters\n", lineCounter);
-                return control = true;
+                control = true;
             }
         }
     }
@@ -271,11 +297,13 @@ void systemCheck(void *memory){
  */
 void freeListItems(list *ls){
     while(ls->next!=NULL){
-        struct userInfo *ui = ls->next;
-        struct userInfo *tempUI = ui->next;
+        node *freenode = ls->next;
+        struct userInfo *ui = freenode->data;
         free(ui->uname);
-        free(ui);
-        ls->next = tempUI;
+        node *tempNode = freenode->next;
+        free(freenode->data);
+        free(freenode);
+        ls->next = tempNode;
     }
 }
 

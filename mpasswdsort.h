@@ -9,6 +9,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "list.h"
+/**
+ * Name: userInfo
+ * Description: this is the structure of list elements in this laboration.
+ * @param uid
+ * @param uname
+ * @param next (pointer to next element in list)
+ */
+struct userInfo{ unsigned int uid; char* uname;};
 
 /**
  * Name: controlLine
@@ -87,5 +95,15 @@ void systemCheck(void *memory);
  * @param ls: list to be freed
  */
 void freeListItems(list *ls);
+
+/**
+ * Name: comparefunc
+ * Description: Compare function to be send to the list for comparing elements
+ * in the list.
+ * @param element1
+ * @param element2
+ * @return
+ */
+bool comparefunc(node *element1, node *element2);
 #endif //LINKEDLIST_MPASSWDSORT_H
 

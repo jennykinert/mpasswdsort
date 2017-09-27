@@ -3,15 +3,15 @@ CFLAGS=-Wall -pedantic -std=gnu11 -g -Werror -Wextra -Wmissing-declarations
 
 all:mpasswdsort
 
-mpasswdsort:list.o mpasswdsort.o
-	$(CC) mpasswdsort.o list.o $(CFLAGS) -o mpasswdsort
+mpasswdsort:mpasswdsort.o 
+	$(CC) -c $(CFLAGS) mpasswdsort.o list.o -o mpasswdsort
 
-list.o:list.h list.c
-	$(CC) -c $(CFLAGS) list.c
-
-mpasswdsort.o: mpasswdsort.c mpasswdsort.h
+mpasswdsort.o:mpasswdsort.c 
 	$(CC) -c $(CFLAGS) mpasswdsort.c
 
+list.o:list.c list.h
+	$(CC) -c $(CFLAGS) list.c
 
-clean:
-	rm -f list mpasswdsort *.o core
+clean: 
+	rm *o mpasswdsort
+
