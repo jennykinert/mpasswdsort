@@ -18,8 +18,6 @@ int main(int argc, char** argv ) {
     char *buffer = malloc(MAXSIZE);
     systemCheck(buffer);
 
-
-    //list *ls = newEmptyLinkedList();
     list *ls = newEmptyLinkedList(comparefunc);
     // This option if no file is attached to program
     if(argc == 1)
@@ -166,13 +164,23 @@ char **getDataFields(char *buffer){
         if(buffer[i]==':'){
             char *parameter = calloc(100, sizeof(char));
             systemCheck(parameter);
-            strncpy(parameter,buffer+lastcolonposition,(size_t)(i-lastcolonposition));
+            strncpy(parameter,buffer+lastcolonposition,
+                    (size_t)(i-lastcolonposition));
             lastcolonposition=i;
             dataFields[colonCounter] = parameter;
             colonCounter++;
         }
+        if(colonCounter==6){
+            char *parameter = calloc(100, sizeof(char));
+            systemCheck(parameter);
+            strncpy(parameter,buffer+lastcolonposition+1,
+                    (size_t)(bufferLength-lastcolonposition));
+            dataFields[colonCounter] = parameter;
+            colonCounter++;
+        }
     }
-    if(colonCounter == 0 || colonCounter!=6 ){
+    if(colonCounter == 0 || colonCounter!=7 ){
+        free(dataFields[0]); 
         dataFields[0] = 0;
     }
     return dataFields;
@@ -195,37 +203,41 @@ bool controlLine(char *buffer, int lineCounter){
                 "line is wrong\n");
         control = true;
     }
-    for(int i =0; i<numberOfFields; i++){
-        if(i==0|| i==2 || i==3 ){
-            control = controlIfEmpty(dataFields[i]);
-            if(control){
-                const char *typeOfField = getFieldName(i);
-                fprintf(stderr,"Line %d: %s cannot be empty \n",lineCounter,
-                        typeOfField);
-                control = true;
+    else{
+        for(int i =0; i<numberOfFields; i++){
+            if(i==0|| i==2 || i==3 || i==5 || i==6){
+                control = controlIfEmpty(dataFields[i]);
+                if(control){
+                    const char *typeOfField = getFieldName(i);
+                    fprintf(stderr,"Line %d: %s cannot be empty \n",lineCounter,
+                            typeOfField);
+                    control = true;
+                    break;
+                }
             }
-        }
-        if(i == 2 || i == 3){
-            control = controlIfNumber(dataFields[i]);
-            if(control){
-                const char *typeOfField = getFieldName(i);
-                fprintf(stderr,"Line %d: %s is not a number \n",lineCounter,
-                        typeOfField);
-                control = true;
+            if(i == 2 || i == 3){
+                control = controlIfNumber(dataFields[i]);
+                if(control){
+                    const char *typeOfField = getFieldName(i);
+                    fprintf(stderr,"Line %d: %s is not a number \n",lineCounter,
+                            typeOfField);
+                    control = true;
+                    break;
+                }
             }
-        }
-        if(i==0){
-            if(strlen(dataFields[i])>32) {
-                fprintf(stderr, "Line %d: The username"
-                        "cannot be longer than 32 letters\n", lineCounter);
-                control = true;
+            if(i==0){
+                if(strlen(dataFields[i])>32) {
+                    fprintf(stderr, "Line %d: The username"
+                            "cannot be longer than 32 letters\n", lineCounter);
+                    control = true;
+                    break;
+                }
             }
         }
     }
     freeDataFields(dataFields);
     free(dataFields);
     return control;
-
 }
 /**
  * Name: controlIfNumber
@@ -239,7 +251,7 @@ bool controlIfNumber(char *parameter){
     for(int i =1; i<lengthOfCpy; i++){
         int digit = parameter[i];
         if(!isdigit(digit)){
-            return control = true;
+            control = true;
         }
     }
     return control;
@@ -253,11 +265,12 @@ bool controlIfNumber(char *parameter){
 bool controlIfEmpty(char *parameter){
     bool control = false;
     if(strlen(parameter) == 0){
-        return control = true;
+        control = true;
     }
-    else{
-        return control;
+    if(strcmp(parameter,":")==0){
+        control = true;
     }
+    return control;
 }
 
 /**
